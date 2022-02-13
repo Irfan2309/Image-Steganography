@@ -1,6 +1,6 @@
-# Who I am
+# Who I am: Irfanuddin Syed
 
-- Student ID: <insert your personal student ID, e.g. H12345678>
+- Student ID: <insert your personal student ID, e.g. H00389591>
 
 # Program design
 
