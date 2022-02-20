@@ -12,8 +12,8 @@ struct Pixel {
 
 /* An image loaded from a PPM file. */
 struct PPM {
-    char format[2]; //intitialized with 2 character "format" because PPM is P3
-    struct Pixel ** data; //defining "Pixel" as a pointer array
+    char format[2]; 
+    struct Pixel ** data; 
     int max; 
     int height; 
     int width; 
@@ -23,14 +23,47 @@ struct PPM {
  * Returns a new struct PPM, or NULL if the image cannot be read. */
 struct PPM *getPPM(FILE * f)
 {
-    /* TODO: Question 2a */
-    return NULL;
+    struct PPM * ppm = malloc(sizeof(struct PPM)); 
+    fscanf(f, "%s\n", ppm -> format); 
+
+    if (strcmp(ppm -> format, "P3") != 0)
+    {
+        printf("Image cannot be read");
+        return NULL;
+    }  
+    fscanf(f, "%i %i\n", &ppm -> width, &ppm -> height);
+    fscanf(f, "%i\n", &ppm -> max); 
+
+    ppm -> data = (struct Pixel **) malloc((ppm -> height)*sizeof(struct Pixel *));
+    for (int i = 0; i < ppm -> height; i++)
+    {
+        ppm -> data[i] = (struct Pixel *) malloc((ppm -> width)*sizeof(struct Pixel));
+        for(int j = 0; j < ppm -> width; j++){ 
+            fscanf (f,"%i",&(ppm -> data[i][j]).red); 
+            fscanf (f,"%i",&(ppm -> data[i][j]).green); 
+            fscanf (f,"%i",&(ppm -> data[i][j]).blue);
+        }
+    }
+    return ppm; 
 }
 
 /* Write img to stdout in PPM format. */
 void showPPM(const struct PPM *img)
 {
-    /* TODO: Question 2b */
+    printf("P3\n");
+    printf("%i\n", img -> width);
+    printf("%i\n", img -> height);
+    printf("%i\n", img -> max);
+
+
+    for (int i = 0; i < img -> height; i++)
+    {
+        for (int j = 0; j < img -> width; j++)
+        {
+            struct Pixel p1 = img -> data[i][j];
+            printf("%i %i %i\n", p1.red, p1.green, p1.blue);
+        }  
+    }    
 }
 
 /* Opens and reads a PPM file, returning a pointer to a new struct PPM.
