@@ -12,7 +12,11 @@ struct Pixel {
 
 /* An image loaded from a PPM file. */
 struct PPM {
-    /* TODO: Question 1 */
+    char format[2]; //intitialized with 2 character "format" because PPM is P3
+    struct Pixel ** data; //defining "Pixel" as a pointer array
+    int max; 
+    int height; 
+    int width; 
 };
 
 /* Reads an image from an open PPM file.
