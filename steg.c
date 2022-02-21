@@ -23,9 +23,13 @@ struct PPM {
  * Returns a new struct PPM, or NULL if the image cannot be read. */
 struct PPM *getPPM(FILE * f)
 {
+    //allocating memory for the PPM file
     struct PPM * ppm = malloc(sizeof(struct PPM)); 
+
+    //store the PPM file format
     fscanf(f, "%s\n", ppm -> format); 
 
+    //error case: not in p3 format
     if (strcmp(ppm -> format, "P3") != 0)
     {
         printf("Image cannot be read");
@@ -35,6 +39,8 @@ struct PPM *getPPM(FILE * f)
     fscanf(f, "%i\n", &ppm -> max); 
 
     ppm -> data = (struct Pixel **) malloc((ppm -> height)*sizeof(struct Pixel *));
+
+    //scanning the data of the pixels
     for (int i = 0; i < ppm -> height; i++)
     {
         ppm -> data[i] = (struct Pixel *) malloc((ppm -> width)*sizeof(struct Pixel));
@@ -50,18 +56,19 @@ struct PPM *getPPM(FILE * f)
 /* Write img to stdout in PPM format. */
 void showPPM(const struct PPM *img)
 {
+    //print the PPM file information: P3, its height, width and max rgb value
     printf("P3\n");
     printf("%i\n", img -> width);
     printf("%i\n", img -> height);
     printf("%i\n", img -> max);
 
-
+    //printing out the rgb values respectively in matrix format
     for (int i = 0; i < img -> height; i++)
     {
         for (int j = 0; j < img -> width; j++)
         {
-            struct Pixel p1 = img -> data[i][j];
-            printf("%i %i %i\n", p1.red, p1.green, p1.blue);
+            struct Pixel p = img -> data[i][j];
+            printf("%i %i %i\n", p.red, p.green, p.blue);
         }  
     }    
 }
@@ -95,8 +102,46 @@ struct PPM *readPPM(const char *filename)
  * Returns a new struct PPM, or NULL on error. */
 struct PPM *encode(const char *text, const struct PPM *img)
 {
-    /* TODO: Question 2c */
-    return NULL;
+    //introducing needed variables
+    struct PPM * img1 = (struct PPM*) img;
+    srand(time(NULL));
+    int x_pix;
+    int rand_int;
+    int len = strlen(text);
+    int width1 = img1 -> width;
+    int height1 = img1 -> height;
+
+    //error case: message too long
+    if (len > 75)
+    {
+        printf("Message too large for image\n");
+        return NULL;
+    }
+
+    //encoding the message into the ppm file 
+    for (int i = 0; i < len; i++)
+    {
+        int row;
+        int col;
+
+        rand_int = (rand() % 100);
+        x_pix = x_pix + rand_int;
+
+        row = x_pix / width1;
+        col = x_pix - (row * width1);
+
+        if(text[i] != img1 -> data[row][col].red)
+        {
+            img1 -> data[row][col].red = text[i];
+        }
+        //error case: ASCII value same as that of the red pixel
+        else{
+            printf("Error!\nCould not encode message");
+            return NULL;
+        }
+    }
+    return img1;
+
 }
 
 /* Extract the string encoded in the red channel of newimg, by comparing it
@@ -104,8 +149,41 @@ struct PPM *encode(const char *text, const struct PPM *img)
  * Returns a new C string, or NULL on error. */
 char *decode(const struct PPM *oldimg, const struct PPM *newimg)
 {
-    /* TODO: Question 2d */
-    return NULL;
+    //introducing needed variables
+    int w1 = oldimg -> width;
+    int h1 = oldimg -> height;
+    struct Pixel ** p1 = oldimg -> data;
+
+    int w2 = newimg -> width;
+    int h2 = newimg -> height;
+    struct Pixel ** p2 = newimg -> data;
+
+    int len_counter;
+    len_counter = 0;
+
+    //setting memory allocation for the decoded message
+    char *message = malloc(sizeof(char) * 75);
+
+    //error case: sizes are different
+    if (w1 != w2 || h1 != h2)
+    {
+        printf("Error!\nDimensions of the PPM files are different");
+        return NULL;
+    }
+
+    //reading the contents of the file and revealing the decoded message
+    for (int i = 0; i < h2; i++)
+    {
+        for (int j = 0; j < w2; j++)
+        {
+            if (p1[i][j].red != p2[i][j].red)
+            {
+                message[len_counter] = p2[i][j].red;
+                len_counter ++; 
+            }         
+        }  
+    }
+    return message;
 }
 
 /* TODO: Question 3 */
