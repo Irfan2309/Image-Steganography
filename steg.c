@@ -196,36 +196,56 @@ int main(int argc, char *argv[])
     if (argc == 3 && strcmp(argv[1], "t") == 0) {
         /* Mode "t" - test PPM reading and writing */
 
-        struct PPM *img = readPPM(argv[2]);
+        struct PPM *img;
+        img = readPPM(argv[2]);
         showPPM(img);
 
     } else if (argc == 3 && strcmp(argv[1], "e") == 0) {
         /* Mode "e" - encode PPM */
 
-        struct PPM *oldimg = readPPM(argv[2]);
 
         /* TODO: prompt for a message from the user, and read it into a string */
 
-        struct PPM *newimg;
+        struct PPM *oldimg;
+        oldimg = readPPM(argv[2]);
+
+        char en_message[75];
+        fprintf(stderr, "Message: ");
+        fgets(en_message, 75, stdin);
+
         /* TODO: encode the text into the image with encode, and assign to newimg */
 
+        struct PPM *newimg;
+        newimg = encode(en_message, oldimg);
+
         /* TODO: write the image to stdout with showPPM */
+
+        showPPM(newimg);
+        return 0;
 
     } else if (argc == 4 && strcmp(argv[1], "d") == 0) {
         /* Mode "d" - decode PPM */
 
-        struct PPM *oldimg;
         /* TODO: get original file filename from argv, load it with
            readPPM, then assign to oldimg */
 
-        struct PPM *newimg;
+        struct PPM *oldimg;
+        oldimg = readPPM(argv[2]);
+
         /* TODO: get encoded file filename from argv, load it with
            readPPM, then assign to newimg */
 
-        char *message;
+        struct PPM *newimg;
+        newimg = readPPM(argv[3]);
+
         /* TODO: decode the encodedPPM with the comparisonPPM and assign to message */
 
+        char * message;
+        message = decode(oldimg, newimg);
+
         /* TODO: print the decoded message to stdout */
+
+        printf("Encoded message: %s\n", message);
 
     } else {
         fprintf(stderr, "Unrecognised or incomplete command line.\n");
