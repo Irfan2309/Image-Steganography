@@ -10,10 +10,17 @@ struct Pixel {
     int blue;
 };
 
+struct Node
+{
+    char *curr;
+    struct Node *next;
+};
+
 /* An image loaded from a PPM file. */
 struct PPM {
     char format[2]; 
     struct Pixel ** data; 
+    struct Node * dat1;
     int max; 
     int height; 
     int width; 
@@ -35,8 +42,42 @@ struct PPM *getPPM(FILE * f)
         printf("Image cannot be read");
         return NULL;
     }  
-    fscanf(f, "%i %i\n", &ppm -> width, &ppm -> height);
-    fscanf(f, "%i\n", &ppm -> max); 
+
+    //additional feature: comments
+    struct Node *new;
+    char comments[50];
+    while (fgets(comments, 50, f))
+    {
+        if (comments[0] == '#')
+        {
+            new = (struct Node*)malloc(sizeof(struct Node));
+            new -> curr = (char *)malloc(strlen(comments));
+            new -> next = NULL;
+            strcpy(new -> curr, comments);
+            if (ppm -> dat1 == NULL)
+            {
+                ppm -> dat1 = new;
+            }
+            else
+            {
+                struct Node *curr_n = ppm -> dat1;
+                while (curr_n -> next != NULL)
+                {
+                    curr_n = curr_n -> next;
+                }
+                curr_n -> next = new;
+            }   
+        }
+        else
+        {
+            sscanf(comments, "%i %i\n", &ppm -> width, &ppm -> height);
+            fgets(comments, 50, f);
+            sscanf(comments, "%i\n", &ppm -> max);
+
+            break;
+        }    
+    }
+
 
     ppm -> data = (struct Pixel **) malloc((ppm -> height)*sizeof(struct Pixel *));
 
@@ -56,10 +97,19 @@ struct PPM *getPPM(FILE * f)
 /* Write img to stdout in PPM format. */
 void showPPM(const struct PPM *img)
 {
-    //print the PPM file information: P3, its height, width and max rgb value
+    //printing ppm details: P3 format
     printf("P3\n");
-    printf("%i\n", img -> width);
-    printf("%i\n", img -> height);
+
+     //additional feature: comments
+    struct Node *text = img -> dat1;
+    while (text != NULL)
+    {
+        printf("%s", text -> curr);
+        text = text -> next;
+    }
+
+    //printing ppm details: width, height and max rgb value
+    printf("%i %i\n", img -> width, img -> height);
     printf("%i\n", img -> max);
 
     //printing out the rgb values respectively in matrix format
@@ -68,7 +118,9 @@ void showPPM(const struct PPM *img)
         for (int j = 0; j < img -> width; j++)
         {
             struct Pixel p = img -> data[i][j];
-            printf("%i %i %i\n", p.red, p.green, p.blue);
+            printf("%i\n", p.red);
+            printf("%i\n", p.green);
+            printf("%i\n", p.blue);
         }  
     }    
 }
@@ -167,7 +219,7 @@ char *decode(const struct PPM *oldimg, const struct PPM *newimg)
     //error case: sizes are different
     if (w1 != w2 || h1 != h2)
     {
-        printf("Error!\nDimensions of the PPM files are different");
+        printf("Error!\nDimensions of the PPM files are different\n");
         return NULL;
     }
 
